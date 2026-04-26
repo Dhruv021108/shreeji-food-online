@@ -23,11 +23,14 @@ function Home({ data, setData }) {
 export default function App() {
   const { isOwner } = useAuth();
   const { socket } = useSocket();
-  const [data, setData] = useState({ menu: [], categories: [], content: {} });
+  const [data, setData] = useState({ menu: fallbackMenu, categories: fallbackCategories, content: fallbackContent });
   const load = async () => {
     try {
       const [menu, categories, content] = await Promise.all([api.get("/api/menu"), api.get("/api/categories"), api.get("/api/content")]);
-      setData({ menu: menu.data, categories: categories.data, content: content.data });
+      const nextMenu = Array.isArray(menu.data) && menu.data.length ? menu.data : fallbackMenu;
+      const nextCategories = Array.isArray(categories.data) && categories.data.length ? categories.data : fallbackCategories;
+      const nextContent = content.data && Object.keys(content.data).length ? { ...fallbackContent, ...content.data } : fallbackContent;
+      setData({ menu: nextMenu, categories: nextCategories, content: nextContent });
     } catch {
       setData({ menu: fallbackMenu, categories: fallbackCategories, content: fallbackContent });
     }
