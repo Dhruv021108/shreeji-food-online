@@ -12,6 +12,7 @@ export function SocketProvider({ children }) {
   useEffect(() => {
     const s = io(import.meta.env.VITE_API_URL || "http://localhost:5000");
     setSocket(s);
+    s.on("connect_error", () => {});
     return () => s.disconnect();
   }, []);
   useEffect(() => {

@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+import { createLocalOrder, localUpiPayment, updateLocalOrder } from "../utils/localStore";
 
 export default function Checkout() {
   const { user, loginPhone } = useAuth();
@@ -15,16 +16,28 @@ export default function Checkout() {
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const createUpiPayment = async (e) => {
     e.preventDefault();
-    if (!user) await loginPhone(form.phone);
+    const activeUser = user || await loginPhone(form.phone);
     const items = cart.items.map((x) => ({ menuItem: x._id, name: x.name, price: x.price, quantity: x.quantity, image: x.image }));
-    const orderRes = await api.post("/api/orders", { ...form, coupon: cart.coupon, items });
-    const upiRes = await api.post("/api/payment/create-upi", { orderId: orderRes.data._id });
-    setUpi(upiRes.data);
-    window.location.href = upiRes.data.upiLink;
+    try {
+      const orderRes = await api.post("/api/orders", { ...form, coupon: cart.coupon, items });
+      const upiRes = await api.post("/api/payment/create-upi", { orderId: orderRes.data._id });
+      setUpi(upiRes.data);
+      window.location.href = upiRes.data.upiLink;
+    } catch {
+      const order = createLocalOrder({ user: activeUser, form, items, coupon: cart.coupon, totals: cart });
+      const localPayment = localUpiPayment(order);
+      setUpi(localPayment);
+      window.location.href = localPayment.upiLink;
+    }
     toast.success("UPI app opened. Enter UTR after payment.");
   };
   const confirmPayment = async () => {
-    await api.post("/api/payment/confirm", { orderId: upi.order._id, reference });
+    if (!reference.trim() || reference.trim().length < 6) return toast.error("Enter a valid UPI reference");
+    try {
+      await api.post("/api/payment/confirm", { orderId: upi.order._id, reference });
+    } catch {
+      updateLocalOrder(upi.order._id, { paymentStatus: "submitted", paymentId: reference.trim() });
+    }
     toast.success("Payment reference submitted");
     cart.clear();
     navigate("/orders");
