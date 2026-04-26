@@ -1,1 +1,1 @@
-export default function Footer() { return <footer className="border-t border-orange-100 bg-white px-4 py-8 text-center text-sm text-gray-500">© {new Date().getFullYear()} Shreeji Food Online. Fresh food, secure payments, live ordering.</footer>; }
+export default function Footer() { return <footer className="border-t border-gold/20 bg-royal px-4 py-10 text-center text-sm text-white/55">© {new Date().getFullYear()} Shreeji Food Online. Premium Indian dining, UPI payments, live ordering.</footer>; }

@@ -34,5 +34,5 @@ export default function App() {
     socket.on("content:updated", ({ key, value }) => setData((d) => ({ ...d, content: { ...d.content, [key]: value } })));
     return () => { socket.off("menu:updated", load); socket.off("content:updated"); };
   }, [socket]);
-  return <div className="min-h-screen bg-[#fffaf4] text-ink"><Navbar /><main><Routes><Route path="/" element={<Home data={data} setData={setData} />} /><Route path="/checkout" element={<Checkout />} /><Route path="/orders" element={<OrderTracker />} /><Route path="/owner" element={isOwner ? <OwnerDashboard data={data} reload={load} /> : <Navigate to="/" />} /></Routes></main><CartDrawer /></div>;
+  return <div className="min-h-screen text-ink"><Navbar /><main><Routes><Route path="/" element={<Home data={data} setData={setData} />} /><Route path="/checkout" element={<Checkout />} /><Route path="/orders" element={<OrderTracker />} /><Route path="/owner" element={isOwner ? <OwnerDashboard data={data} reload={load} /> : <Navigate to="/" />} /></Routes></main><CartDrawer /></div>;
 }
