@@ -1,0 +1,6 @@
+import { MapPin, Phone, Clock, MessageCircle } from "lucide-react";
+import EditableText from "./EditableText";
+
+export default function Contact({ content }) {
+  return <section id="contact" className="mx-auto grid max-w-7xl gap-8 px-4 py-14 md:grid-cols-2"><div><p className="section-kicker">Visit us</p><h2 className="section-title">Contact and hours</h2><div className="mt-6 space-y-4 text-gray-700"><p className="flex gap-3"><MapPin className="text-saffron" /><EditableText contentKey="contactAddress" value={content.contactAddress || "Mumbai, Maharashtra"} /></p><p className="flex gap-3"><Phone className="text-saffron" /><EditableText contentKey="contactPhone" value={content.contactPhone || "+91 7021157367"} /></p><p className="flex gap-3"><Clock className="text-saffron" /><EditableText contentKey="openingHours" value={content.openingHours || "Open daily"} /></p></div><a className="btn-primary mt-6 inline-flex" href="https://wa.me/917021157367"><MessageCircle className="h-4 w-4" /> WhatsApp</a></div><div className="grid min-h-[320px] place-items-center rounded-3xl border border-orange-100 bg-orange-50 text-center"><div><MapPin className="mx-auto h-12 w-12 text-masala" /><p className="mt-3 font-black">Google Maps Area</p><p className="text-sm text-gray-500">Embed your restaurant map before deployment.</p></div></div></section>;
+}

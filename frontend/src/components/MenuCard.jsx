@@ -1,0 +1,16 @@
+import { motion } from "framer-motion";
+import { Pencil, Plus, Star, Trash2 } from "lucide-react";
+import toast from "react-hot-toast";
+import api from "../api/axios";
+import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
+import EditableText from "./EditableText";
+
+export default function MenuCard({ item, categories, reload }) {
+  const { isOwner } = useAuth();
+  const { add } = useCart();
+  const update = async (patch) => { await api.put(`/api/menu/${item._id}`, patch); reload?.(); };
+  const remove = async () => { if (confirm("Delete this item?")) { await api.delete(`/api/menu/${item._id}`); toast.success("Item deleted"); reload?.(); } };
+  const editImage = () => { if (isOwner) { const image = prompt("Menu image URL", item.image || ""); if (image) update({ image }); } };
+  return <motion.article layout className={`food-card ${!item.isAvailable ? "opacity-60" : ""}`}><div className="relative"><img onDoubleClick={editImage} src={item.image} alt={item.name} className={`h-48 w-full rounded-t-2xl object-cover ${isOwner ? "cursor-pointer" : ""}`} /><span className={`absolute left-3 top-3 rounded-full px-3 py-1 text-xs font-black text-white ${item.foodType === "veg" ? "bg-chutney" : "bg-masala"}`}>{item.foodType}</span>{isOwner && <div className="absolute right-3 top-3 flex gap-2"><button className="icon-btn bg-white" onClick={() => update({ isAvailable: !item.isAvailable })}><Pencil /></button><button className="icon-btn bg-white text-masala" onClick={remove}><Trash2 /></button></div>}</div><div className="space-y-3 p-4"><div className="flex items-start justify-between gap-3"><EditableText as="h3" value={item.name} className="text-lg font-black" onSaved={(v) => update({ name: v })} /><span className="flex items-center gap-1 rounded-full bg-green-50 px-2 py-1 text-xs font-bold text-chutney"><Star className="h-3 w-3 fill-current" />{item.rating}</span></div><EditableText as="p" value={item.description} className="min-h-[48px] text-sm leading-6 text-gray-600" onSaved={(v) => update({ description: v })} /><div className="flex items-center justify-between"><div><span className="text-xs font-bold uppercase text-gray-400">Price</span><EditableText as="p" type="number" value={item.price} className="text-2xl font-black text-masala" onSaved={(v) => update({ price: v })} /></div><button disabled={!item.isAvailable} onClick={() => add(item)} className="btn-primary disabled:cursor-not-allowed disabled:bg-gray-300"><Plus className="h-4 w-4" /> Add</button></div>{isOwner && <div className="grid grid-cols-2 gap-2 pt-2"><select className="field text-xs" value={item.foodType} onChange={(e) => update({ foodType: e.target.value })}><option value="veg">veg</option><option value="non-veg">non-veg</option></select><select className="field text-xs" value={item.category?._id || item.category || ""} onChange={(e) => { const c = categories.find((x) => x._id === e.target.value); update({ category: e.target.value, categoryName: c?.name || "" }); }}>{categories.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}</select></div>}<p className={`text-xs font-black ${item.isAvailable ? "text-chutney" : "text-masala"}`}>{item.isAvailable ? "Available now" : "Unavailable"}</p></div></motion.article>;
+}
