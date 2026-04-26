@@ -14,6 +14,7 @@ import CartDrawer from "./components/CartDrawer";
 import Checkout from "./components/Checkout";
 import OwnerDashboard from "./components/OwnerDashboard";
 import OrderTracker from "./components/OrderTracker";
+import { fallbackCategories, fallbackContent, fallbackMenu } from "./data/fallbackData";
 
 function Home({ data, setData }) {
   return <><Hero content={data.content} /><CategoryBar categories={data.categories} /><MenuSection menu={data.menu} categories={data.categories} setData={setData} /><Offers content={data.content} /><Contact content={data.content} /><Footer /></>;
@@ -24,8 +25,12 @@ export default function App() {
   const { socket } = useSocket();
   const [data, setData] = useState({ menu: [], categories: [], content: {} });
   const load = async () => {
-    const [menu, categories, content] = await Promise.all([api.get("/api/menu"), api.get("/api/categories"), api.get("/api/content")]);
-    setData({ menu: menu.data, categories: categories.data, content: content.data });
+    try {
+      const [menu, categories, content] = await Promise.all([api.get("/api/menu"), api.get("/api/categories"), api.get("/api/content")]);
+      setData({ menu: menu.data, categories: categories.data, content: content.data });
+    } catch {
+      setData({ menu: fallbackMenu, categories: fallbackCategories, content: fallbackContent });
+    }
   };
   useEffect(() => { load(); }, []);
   useEffect(() => {
